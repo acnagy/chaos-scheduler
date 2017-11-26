@@ -10,20 +10,20 @@ import (
 	//"os"
 )
 
-var threadpool_size = flag.Int("t", 10, "set size for threadpool")
-var weather_mode = flag.Bool("w", true, "run weather scheduling")
-var random_mode = flag.Bool("r", true, "run random scheduling")
+var threadpoolSize = flag.Int("t", 10, "set size for threadpool")
+var weatherMode = flag.Bool("w", true, "run weather scheduling")
+var randomMode = flag.Bool("r", true, "run random scheduling")
 
 func main() {
 
 	flag.Parse()
-	threadpool := make([]threads.Thread, *threadpool_size)
-	threadpool = threads.Init_Threadpool(threadpool, *threadpool_size)
-	threads.Print_Threadpool(threadpool, *threadpool_size)
+	threadpool := make([]threads.Thread, *threadpoolSize)
+	threadpool = threads.InitThreadpool(threadpool, *threadpoolSize)
+	threads.PrintThreadpool(threadpool, *threadpoolSize)
 
-	if *random_mode {
+	if *randomMode {
 		done := make(chan bool, 1)
-		go random.Run(threadpool, *threadpool_size, done)
+		go random.Run(threadpool, *threadpoolSize, done)
 		<-done
 	}
 

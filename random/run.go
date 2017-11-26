@@ -4,10 +4,10 @@ import (
 	"github.com/acnagy/chaos-scheduler/threads"
 )
 
-func Run(thpool []threads.Thread, thpool_size int, done chan bool) {
-	set_priorities(thpool, thpool_size)
-	//threads.Print_Threadpool(thpool, thpool_size)
-	threads.Work("random", thpool, thpool_size)
+func Run(thpool []threads.Thread, thpoolSize int, done chan bool) {
+	set_priorities(thpool, thpoolSize)
+	//threads.PrintThreadpool(thpool, thpoolSize)
+	threads.Work("random", thpool, thpoolSize)
 
 	done <- true
 }

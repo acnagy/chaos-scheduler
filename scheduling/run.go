@@ -14,7 +14,14 @@ func Run(process string, thpool []threads.Thread, thpoolSize int, done chan bool
 	log.Println(startedMsg)
 	stout.Println(startedMsg)
 
-	set_priorities(thpool, thpoolSize)
+	switch process {
+	case "random":
+		random_priorities(thpool, thpoolSize)
+	default:
+		stout.Println("process selection error")
+		log.Panicln("invalid process selection string")
+	}
+
 	threads.Work(process, thpool, thpoolSize)
 
 	doneMsg := fmt.Sprintf("[%s] - done", process)

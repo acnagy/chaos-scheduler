@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func Retrieve() {
+func retrieve() {
 
 	type geolocation struct {
 		city    string `json: "city"`

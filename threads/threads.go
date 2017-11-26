@@ -1,7 +1,9 @@
 package threads
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -24,29 +26,35 @@ func InitThreadpool(thpool []Thread, thpoolSize int) []Thread {
 	return thpool
 }
 
-func PrintThreadpool(thpool []Thread, thpoolSize int) {
+func LogThreadpool(thpool []Thread, thpoolSize int) {
+	var buffer bytes.Buffer
+
 	for i := 0; i < thpoolSize; i++ {
-		fmt.Printf("id: %5d - priority: %5d - worktime: %5d\n",
+		th := fmt.Sprintf("id: %5d - priority: %5d - worktime: %5d\n",
 			thpool[i].Id,
 			thpool[i].Priority,
 			thpool[i].Worktime,
 		)
+		buffer.WriteString(th)
 	}
-	fmt.Println()
+	fmt.Println(buffer.String())
 }
 
 func Work(process string, thpool []Thread, thpoolSize int) (runtime int) {
 
 	thpool = bubbleSortThreads(thpool, thpoolSize)
-	PrintThreadpool(thpool, thpoolSize)
+	LogThreadpool(thpool, thpoolSize)
 	for i := 0; i < thpoolSize; i++ {
-		fmt.Printf("[%s] - working %d ms...", process, thpool[i].Worktime/1E6)
+		log.Printf("[%s] id: %d - working %d ms...",
+			process, thpool[i].Id, thpool[i].Worktime/1E6)
 		time.Sleep(time.Duration(thpool[i].Worktime) * time.Nanosecond)
 		runtime = runtime + thpool[i].Worktime
-		fmt.Printf("done\n")
+		log.Printf("[%s] id: %d - done\n", process, thpool[i].Id)
+
+		thpool[i] = Thread{0, 0, 0}
 	}
 
-	fmt.Printf("[%s] total runtime: %d ms\n", process, runtime/1E6)
+	log.Printf("[%s] total runtime: %d ms\n", process, runtime/1E6)
 	return runtime
 
 }

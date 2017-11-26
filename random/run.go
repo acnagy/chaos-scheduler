@@ -6,7 +6,6 @@ import (
 
 func Run(thpool []threads.Thread, thpoolSize int, done chan bool) {
 	set_priorities(thpool, thpoolSize)
-	//threads.PrintThreadpool(thpool, thpoolSize)
 	threads.Work("random", thpool, thpoolSize)
 
 	done <- true

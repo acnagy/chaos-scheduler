@@ -2,6 +2,7 @@ package scheduling
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/acnagy/chaos-scheduler/threads"
 	"io/ioutil"
 	"log"
@@ -9,16 +10,6 @@ import (
 	"os"
 	"strconv"
 )
-
-type conditions struct {
-	city         string  `json: "city"`
-	state        string  `json: "state"`
-	country      string  `json: "country_name"`
-	wind_gust    float32 `json: "wind_gust_mph"`
-	temp         float32 `json: "temp_f"`
-	precip_total float32 `json: "precip_today_in"`
-	pressure     float32 `json: "pressure_in"`
-}
 
 var lat float64
 var long float64
@@ -42,19 +33,48 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 		defer resp.Body.Close()
 
 		status := resp.Status
-		body, err := ioutil.ReadAll(resp.Body)
-		log.Printf("[weather] response status for thread id: %d - %s\n", thpool[i].Id, status)
+		fmt.Printf("[weather] response status for thread id: %d - %s\n", thpool[i].Id, status)
 		if err != nil {
 			log.Printf("[weather] error retrieving conditions: %s\n", err)
 		}
 
-		var cdtn conditions
-		err = json.Unmarshal(body, &cdtn)
-		if err != nil {
-			log.Printf("[weather] error unmarshalling conditions for %s: %s\n", lat_long, err)
+		cdtn, err := ioutil.ReadAll(resp.Body)
+
+		type Conditions struct {
+			City         string  `json:"city"`
+			State        string  `json:"state"`
+			Country      string  `json:"country_name"`
+			Wind_gust    string  `json:"wind_gust_mph"`
+			Temp         float64 `json:"temp_f"`
+			Precip_total string  `json:"precip_today_in"`
+			Pressure     string  `json:"pressure_in"`
+			Station      string  `json:"station_id"`
 		}
 
-		priority := (cdtn.temp / cdtn.pressure) * (cdtn.wind_gust + cdtn.precip_total)
+		type currentObservation struct {
+			Data Conditions `json:"current_observation"`
+		}
+
+		var current currentObservation
+		if err := json.Unmarshal(cdtn, &current); err != nil {
+			log.Printf("[weather] error unmarshalling conditions for %s: %s\n", lat_long, err)
+		}
+		//fmt.Printf("%+v\n", current)
+		temp := current.Data.Temp
+		pressure := current.Data.Pressure
+		gust := current.Data.Wind_gust
+		precip := current.Data.Precip_total
+
+		prs, _ := strconv.ParseFloat(pressure, 64)
+		g, _ := strconv.ParseFloat(gust, 64)
+		prc, _ := strconv.ParseFloat(precip, 64)
+		fmt.Println(temp)
+		fmt.Println(prs)
+		fmt.Println(gust)
+		fmt.Println(precip)
+
+		priority := (temp / prs) * (g + prc)
+		fmt.Printf("[weather] priority calc: %f\n", priority)
 		thpool[i].Priority = uint16(priority)
 	}
 

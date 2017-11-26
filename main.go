@@ -17,16 +17,18 @@ func main() {
 	fmt.Print("chaos-scheduler starting... ")
 
 	// Setup logging
-	file, err := os.OpenFile("dev/log.txt",
+	logfile, err := os.OpenFile("dev/log.txt",
 		os.O_WRONLY|os.O_CREATE|os.O_APPEND,
 		0644,
 	)
 	if err != nil {
 		log.Fatalf("Couldn't open log file: %v", err)
 	}
-	defer file.Close()
-	log.SetOutput(file)
-	log.Println("Started!")
+	defer logfile.Close()
+	log.SetOutput(logfile)
+	log.Printf("[main] Started!")
+
+	//artifact := log.New(os.OpenFile("dev/artifact.txt", "[main]", log.Ldate|log.Ltime|log.Lshortfile))
 
 	// Determine/Notify running modes
 	flag.Parse()

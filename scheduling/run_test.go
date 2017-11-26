@@ -14,7 +14,7 @@ func BenchmarkRun_Random(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		thpool := threads.InitThreadpoolControl()
-		Run("random", thpool, len(thpool), make(chan bool, 1))
+		Run("random", thpool, make(chan bool, 1))
 	}
 }
 
@@ -24,6 +24,6 @@ func BenchmarkRun_Weather(b *testing.B) {
 
 	for n := 0; n < b.N; n++ {
 		thpool := threads.InitThreadpoolControl()
-		Run("random", thpool, len(thpool), make(chan bool, 1))
+		Run("random", thpool, make(chan bool, 1))
 	}
 }

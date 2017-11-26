@@ -2,7 +2,6 @@ package scheduling
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/acnagy/chaos-scheduler/threads"
 	"io/ioutil"
 	"log"

@@ -25,7 +25,7 @@ func TestsortThreads(t *testing.T) {
 	}
 
 	thpoolSorted := sort(thpool)
-	thpoolSortedTest := sortThreads(thpool, len(thpool))
+	thpoolSortedTest := sortThreads(thpool)
 
 	for i := 0; i < len(thpoolSortedTest); i++ {
 		if thpoolSorted[i].Id != thpoolSortedTest[i].Id {
@@ -43,7 +43,7 @@ func TestWork(t *testing.T) {
 	for i := 0; i < len(thpool); i++ {
 		expectedWorktime = expectedWorktime + thpool[i].Worktime
 	}
-	worktime, _ := Work("testing", thpool, len(thpool))
+	worktime, _ := Work("testing", thpool)
 
 	if worktime != expectedWorktime {
 		t.Fail()

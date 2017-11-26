@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-var threadpoolSize = flag.Int("t", 10, "set size for threadpool")
+var threadpoolSize = flag.Int("t", 5, "set size for threadpool")
 var weatherMode = flag.Bool("w", true, "run weather scheduling")
 var randomMode = flag.Bool("r", true, "run random scheduling")
 
@@ -31,8 +31,8 @@ func main() {
 	// Determine/Notify running modes
 	flag.Parse()
 	threadpool := make([]threads.Thread, *threadpoolSize)
-	threadpool = threads.InitThreadpool(threadpool, *threadpoolSize)
-	threads.LogThreadpool(threadpool, *threadpoolSize)
+	threadpool = threads.InitThreadpool(threadpool)
+	threads.LogThreadpool(threadpool)
 	runConfig := fmt.Sprintf("[main] modes: weather: %t, random: %t, threadpool size: %d\n",
 		*weatherMode, *randomMode, *threadpoolSize)
 
@@ -41,11 +41,19 @@ func main() {
 
 	// Run modes concurrently
 	randomDone := make(chan bool, 1)
+	weatherDone := make(chan bool, 1)
+
 	if *randomMode {
-		go scheduling.Run("random", threadpool, *threadpoolSize, randomDone)
+		go scheduling.Run("random", threadpool, randomDone)
+	}
+
+	if *weatherMode {
+		go scheduling.Run("weather", threadpool, weatherDone)
 	}
 
 	<-randomDone
+	<-weatherDone
+
 	log.Println("[main] - complete!")
 
 }

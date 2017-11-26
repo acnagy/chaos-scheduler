@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Run(process string, thpool []threads.Thread, thpoolSize int, done chan bool) {
+func Run(process string, thpool []threads.Thread, done chan bool) {
 	stout := log.New(os.Stdout, "[chaos-scheduler]", log.Ldate|log.Ltime|log.Lshortfile)
 
 	startedMsg := fmt.Sprintf("[%s] - started", process)
@@ -16,13 +16,15 @@ func Run(process string, thpool []threads.Thread, thpoolSize int, done chan bool
 
 	switch process {
 	case "random":
-		random_priorities(thpool, thpoolSize)
+		random_priorities(thpool)
+	case "weather":
+		weather_priorities(thpool)
 	default:
 		stout.Println("process selection error")
 		log.Panicln("invalid process selection string")
 	}
 
-	threads.Work(process, thpool, thpoolSize)
+	threads.Work(process, thpool)
 
 	doneMsg := fmt.Sprintf("[%s] - done", process)
 	log.Println(doneMsg)

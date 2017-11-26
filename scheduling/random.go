@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-func random_priorities(thpool []threads.Thread, thpoolSize int) []threads.Thread {
+func random_priorities(thpool []threads.Thread) []threads.Thread {
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < thpoolSize; i++ {
-		thpool[i].Priority = uint16(rand.Int31n(2 * int32(thpoolSize)))
+	for i := 0; i < len(thpool); i++ {
+		thpool[i].Priority = uint16(rand.Int31n(2 * int32(len(thpool))))
 	}
 
 	return thpool

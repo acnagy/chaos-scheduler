@@ -1,4 +1,4 @@
-package random
+package scheduling
 
 import (
 	"github.com/acnagy/chaos-scheduler/threads"

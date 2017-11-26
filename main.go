@@ -1,11 +1,10 @@
 package main
 
 import (
-	//"fmt"
-	"github.com/acnagy/chaos-scheduler/random"
-	"github.com/acnagy/chaos-scheduler/threads"
-	//"github.com/acnagy/chaos-scheduler/weather"
 	"flag"
+	"fmt"
+	"github.com/acnagy/chaos-scheduler/scheduling"
+	"github.com/acnagy/chaos-scheduler/threads"
 	"log"
 	"os"
 )
@@ -15,6 +14,7 @@ var weatherMode = flag.Bool("w", true, "run weather scheduling")
 var randomMode = flag.Bool("r", true, "run random scheduling")
 
 func main() {
+	fmt.Print("chaos-scheduler starting... ")
 
 	// Setup logging
 	file, err := os.OpenFile("dev/log.txt",
@@ -25,24 +25,27 @@ func main() {
 		log.Fatalf("Couldn't open log file: %v", err)
 	}
 	defer file.Close()
-
 	log.SetOutput(file)
-	log.Println("[main] Logs ready to go!")
+	log.Println("Started!")
 
-	// Determine running modes
+	// Determine/Notify running modes
 	flag.Parse()
 	threadpool := make([]threads.Thread, *threadpoolSize)
 	threadpool = threads.InitThreadpool(threadpool, *threadpoolSize)
 	threads.LogThreadpool(threadpool, *threadpoolSize)
-	log.Printf("[main] Modes: weather: %t, random: %t, threadpool size: %d",
+	runConfig := fmt.Sprintf("[main] modes: weather: %t, random: %t, threadpool size: %d\n",
 		*weatherMode, *randomMode, *threadpoolSize)
 
+	log.Printf(runConfig)
+	fmt.Printf(runConfig)
+
+	// Run modes concurrently
+	randomDone := make(chan bool, 1)
 	if *randomMode {
-		done := make(chan bool, 1)
-		go random.Run(threadpool, *threadpoolSize, done)
-		<-done
+		go scheduling.Run("random", threadpool, *threadpoolSize, randomDone)
 	}
 
+	<-randomDone
 	log.Println("[main] - complete!")
 
 }

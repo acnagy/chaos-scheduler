@@ -37,12 +37,12 @@ func LogThreadpool(thpool []Thread, thpoolSize int) {
 		)
 		buffer.WriteString(th)
 	}
-	fmt.Println(buffer.String())
 }
 
-func Work(process string, thpool []Thread, thpoolSize int) (runtime int) {
+func Work(process string, thpool []Thread, thpoolSize int) (runtime int, duration time.Duration) {
 
-	thpool = bubbleSortThreads(thpool, thpoolSize)
+	start := time.Now()
+	thpool = sortThreads(thpool, thpoolSize)
 	LogThreadpool(thpool, thpoolSize)
 	for i := 0; i < thpoolSize; i++ {
 		log.Printf("[%s] id: %d - working %d ms...",
@@ -54,12 +54,13 @@ func Work(process string, thpool []Thread, thpoolSize int) (runtime int) {
 		thpool[i] = Thread{0, 0, 0}
 	}
 
-	log.Printf("[%s] total runtime: %d ms\n", process, runtime/1E6)
-	return runtime
+	log.Printf("[%s] total worktime: %d ms, duration: ~%s\n",
+		process, runtime/1E6, time.Since(start).String())
+	return runtime, time.Since(start)
 
 }
 
-func bubbleSortThreads(thpool []Thread, thpoolSize int) (thPoolSorted []Thread) {
+func sortThreads(thpool []Thread, thpoolSize int) (thPoolSorted []Thread) {
 
 	// Bubble sort processes according to priority
 	for i := 0; i < thpoolSize; i++ {
@@ -88,4 +89,19 @@ func threadWorktime() (worktime uint32) {
 	rand.Seed(time.Now().UnixNano())
 	return rand.Uint32()
 
+}
+
+func InitThreadpoolControl() []Thread {
+	return []Thread{
+		{Id: 6, Priority: 2, Worktime: 1000000},
+		{Id: 1, Priority: 10, Worktime: 1500000},
+		{Id: 7, Priority: 3, Worktime: 3000000},
+		{Id: 2, Priority: 4, Worktime: 2500000},
+		{Id: 9, Priority: 5, Worktime: 15000},
+		{Id: 3, Priority: 9, Worktime: 2000000},
+		{Id: 10, Priority: 6, Worktime: 75000},
+		{Id: 4, Priority: 1, Worktime: 50000},
+		{Id: 8, Priority: 7, Worktime: 10000},
+		{Id: 5, Priority: 8, Worktime: 500},
+	}
 }

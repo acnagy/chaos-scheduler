@@ -7,14 +7,18 @@ experiment, possibly with terrible ideas.
 ## Running 
 
 ```
+-r    random mode               | bool  default: true
 -w    weather mode              | bool  default: true
--r    random                    | bool  default: true
--t    set size of threadpool    | int)  default: 5
+-s    shortest-job-first mode   | bool  default: true
+-t    set size of threadpool    | int   default: 5
 ```
 
-Example: 
+Examples: 
 
-`chaos-scheduler -w=true -t=100`
+```
+chaos-scheduler                     | runs all modes, default threadpool size
+chaos-scheduler -w=false -t=100     | does not run weather mode, 100 threads in pool
+```
 
 ## Weather calculation
 

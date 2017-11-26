@@ -10,8 +10,9 @@ import (
 )
 
 var threadpoolSize = flag.Int("t", 5, "set size for threadpool")
-var weatherMode = flag.Bool("w", true, "run weather scheduling")
 var randomMode = flag.Bool("r", true, "run random scheduling")
+var weatherMode = flag.Bool("w", true, "run weather scheduling")
+var sjfMode = flag.Bool("s", true, "run shortest-job-first scheduling")
 
 func main() {
 	fmt.Print("chaos-scheduler starting... ")
@@ -35,8 +36,8 @@ func main() {
 	threadpool := make([]threads.Thread, *threadpoolSize)
 	threadpool = threads.InitThreadpool(threadpool)
 	threads.LogThreadpool(threadpool)
-	runConfig := fmt.Sprintf("[main] modes: weather: %t, random: %t, threadpool size: %d\n",
-		*weatherMode, *randomMode, *threadpoolSize)
+	runConfig := fmt.Sprintf("[main] modes: random: %t, weather: %t, sjf: %t; threadpool size: %d\n",
+		*randomMode, *weatherMode, *sjfMode, *threadpoolSize)
 
 	log.Printf(runConfig)
 	fmt.Printf(runConfig)
@@ -44,17 +45,22 @@ func main() {
 	// Run modes concurrently
 	randomDone := make(chan bool, 1)
 	weatherDone := make(chan bool, 1)
+	sjfDone := make(chan bool, 1)
 
 	if *randomMode {
 		go scheduling.Run("random", threadpool, randomDone)
 	}
-
 	if *weatherMode {
 		go scheduling.Run("weather", threadpool, weatherDone)
 	}
 
+	if *sjfMode {
+		go scheduling.Run("sjf", threadpool, sjfDone)
+	}
+
 	<-randomDone
 	<-weatherDone
+	<-sjfDone
 
 	log.Println("[main] - complete!")
 

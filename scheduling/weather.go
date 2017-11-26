@@ -2,7 +2,6 @@ package scheduling
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/acnagy/chaos-scheduler/threads"
 	"io/ioutil"
 	"log"
@@ -33,7 +32,7 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 		defer resp.Body.Close()
 
 		status := resp.Status
-		fmt.Printf("[weather] response status for thread id: %d - %s\n", thpool[i].Id, status)
+		log.Printf("[weather] response status for thread id: %d - %s\n", thpool[i].Id, status)
 		if err != nil {
 			log.Printf("[weather] error retrieving conditions: %s\n", err)
 		}
@@ -59,7 +58,7 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 		if err := json.Unmarshal(cdtn, &current); err != nil {
 			log.Printf("[weather] error unmarshalling conditions for %s: %s\n", lat_long, err)
 		}
-		//fmt.Printf("%+v\n", current)
+
 		temp := current.Data.Temp
 		pressure := current.Data.Pressure
 		gust := current.Data.Wind_gust
@@ -68,13 +67,8 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 		prs, _ := strconv.ParseFloat(pressure, 64)
 		g, _ := strconv.ParseFloat(gust, 64)
 		prc, _ := strconv.ParseFloat(precip, 64)
-		fmt.Println(temp)
-		fmt.Println(prs)
-		fmt.Println(gust)
-		fmt.Println(precip)
 
 		priority := (temp / prs) * (g + prc)
-		fmt.Printf("[weather] priority calc: %f\n", priority)
 		thpool[i].Priority = uint16(priority)
 	}
 

@@ -19,6 +19,8 @@ func Run(process string, thpool []threads.Thread, done chan bool) {
 		random_priorities(thpool)
 	case "weather":
 		weather_priorities(thpool)
+	case "sjf":
+		sjf_priorities(thpool)
 	default:
 		stout.Println("process selection error")
 		log.Panicln("invalid process selection string")

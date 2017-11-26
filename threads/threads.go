@@ -12,11 +12,11 @@ type Thread struct {
 	Worktime int
 }
 
-func Init_Threadpool(thpool []Thread, thpool_size int) []Thread {
+func InitThreadpool(thpool []Thread, thpoolSize int) []Thread {
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < thpool_size; i++ {
-		th := Thread{thread_id(), 0, rand.Intn(2E9) + 1E6}
+	for i := 0; i < thpoolSize; i++ {
+		th := Thread{threadId(), 0, rand.Intn(2E9) + 1E6}
 		thpool[i] = th
 
 	}
@@ -24,8 +24,8 @@ func Init_Threadpool(thpool []Thread, thpool_size int) []Thread {
 	return thpool
 }
 
-func Print_Threadpool(thpool []Thread, thpool_size int) {
-	for i := 0; i < thpool_size; i++ {
+func PrintThreadpool(thpool []Thread, thpoolSize int) {
+	for i := 0; i < thpoolSize; i++ {
 		fmt.Printf("id: %5d - priority: %5d - worktime: %5d\n",
 			thpool[i].Id,
 			thpool[i].Priority,
@@ -35,11 +35,27 @@ func Print_Threadpool(thpool []Thread, thpool_size int) {
 	fmt.Println()
 }
 
-func Work(process string, thpool []Thread, thpool_size int) {
+func Work(process string, thpool []Thread, thpoolSize int) (runtime int) {
+
+	thpool = bubbleSortThreads(thpool, thpoolSize)
+	PrintThreadpool(thpool, thpoolSize)
+	for i := 0; i < thpoolSize; i++ {
+		fmt.Printf("[%s] - working %d ms...", process, thpool[i].Worktime/1E6)
+		time.Sleep(time.Duration(thpool[i].Worktime) * time.Nanosecond)
+		runtime = runtime + thpool[i].Worktime
+		fmt.Printf("done\n")
+	}
+
+	fmt.Printf("[%s] total runtime: %d ms\n", process, runtime/1E6)
+	return runtime
+
+}
+
+func bubbleSortThreads(thpool []Thread, thpoolSize int) (thPoolSorted []Thread) {
 
 	// Bubble sort processes according to priority
-	for i := 0; i < thpool_size; i++ {
-		for j := 0; j < thpool_size-1; j++ {
+	for i := 0; i < thpoolSize; i++ {
+		for j := 0; j < thpoolSize-1; j++ {
 			if thpool[j].Priority > thpool[j+1].Priority {
 
 				temp := thpool[j]
@@ -49,23 +65,17 @@ func Work(process string, thpool []Thread, thpool_size int) {
 		}
 	}
 
-	Print_Threadpool(thpool, thpool_size)
-
-	for i := 0; i < thpool_size; i++ {
-		fmt.Printf("[%s] - working %d ms...", process, thpool[i].Worktime/1E6)
-		time.Sleep(time.Duration(thpool[i].Worktime) * time.Nanosecond)
-		fmt.Printf("done\n")
-	}
+	return thpool
 
 }
 
-func thread_id() (id uint16) {
+func threadId() (id uint16) {
 
 	rand.Seed(time.Now().UnixNano())
 	return uint16(rand.Uint32())
 }
 
-func thread_worktime() (worktime uint32) {
+func threadWorktime() (worktime uint32) {
 
 	rand.Seed(time.Now().UnixNano())
 	return rand.Uint32()

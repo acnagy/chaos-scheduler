@@ -1,8 +1,6 @@
 package threads
 
 import (
-	"bytes"
-	"fmt"
 	"log"
 	"math/rand"
 	"time"
@@ -14,56 +12,65 @@ type Thread struct {
 	Worktime int
 }
 
-func InitThreadpool(thpool []Thread) []Thread {
+func CreateThread() Thread {
+	rand.Seed(time.Now().UnixNano())
+	th := Thread{uint16(rand.Uint32()), 0, rand.Intn(2E9) + 1E6}
+	return th
+}
+
+func CreateThreadRandomly(ch1 chan Thread, ch2 chan Thread, ch3 chan Thread, thRemaining int, done chan bool) {
 	rand.Seed(time.Now().UnixNano())
 
-	for i := 0; i < len(thpool); i++ {
-		th := Thread{threadId(), 0, rand.Intn(2E9) + 1E6}
-		thpool[i] = th
-
+	for thRemaining >= 0 {
+		t := rand.Uint32() / 1E9
+		time.Sleep(time.Duration(t) * time.Nanosecond)
+		log.Printf("[all] - new thread! Remaining: %d", thRemaining)
+		th := CreateThread()
+		ch1 <- th
+		ch2 <- th
+		ch3 <- th
+		thRemaining = thRemaining - 1
 	}
+	close(ch1)
+	close(ch2)
+	close(ch3)
 
+	done <- true
+}
+
+func PickUpThreads(thpool []Thread, waitingTh chan Thread) []Thread {
+	for i := 0; i < cap(thpool); i++ {
+		if thpool[i].Id == 0 {
+			th := <-waitingTh
+			thpool[i] = th
+		}
+	}
 	return thpool
 }
 
-func LogThreadpool(thpool []Thread) {
-	var buffer bytes.Buffer
-
-	for i := 0; i < len(thpool); i++ {
-		th := fmt.Sprintf("id: %5d - priority: %5d - worktime: %5d\n",
-			thpool[i].Id,
-			thpool[i].Priority,
-			thpool[i].Worktime,
-		)
-		buffer.WriteString(th)
-	}
-}
-
-func Work(process string, thpool []Thread) (runtime int, duration time.Duration) {
-
+func Work(policy string, thpool []Thread) ([]Thread, time.Duration) {
 	start := time.Now()
-	thpool = sortThreads(thpool)
-	LogThreadpool(thpool)
+	threadpool := sortThreads(thpool)
 
 	for i := 0; i < len(thpool); i++ {
-		log.Printf("[%s] id: %d - working %d ms...",
-			process, thpool[i].Id, thpool[i].Worktime/1E6)
-		time.Sleep(time.Duration(thpool[i].Worktime) * time.Nanosecond)
-		runtime = runtime + thpool[i].Worktime
-		log.Printf("[%s] id: %d - done\n", process, thpool[i].Id)
+		if threadpool[i].Id == 0 {
+			log.Printf("[%s] id: %d - working %d ms...",
+				policy, threadpool[i].Id, threadpool[i].Worktime/1E6)
 
-		thpool[i] = Thread{0, 0, 0}
+			time.Sleep(time.Duration(threadpool[i].Worktime) * time.Nanosecond)
+
+			log.Printf("[%s] id: %d - done\n", policy, threadpool[i].Id)
+
+			threadpool[i] = Thread{0, 0, 0}
+		}
 	}
 
-	log.Printf("[%s] total worktime: %d ms, duration: ~%s\n",
-		process, runtime/1E6, time.Since(start).String())
-	return runtime, time.Since(start)
-
+	log.Printf("[%s] duration: ~%s\n", policy, time.Since(start).String())
+	return threadpool, time.Since(start)
 }
 
 func sortThreads(thpool []Thread) (thPoolSorted []Thread) {
-
-	// Bubble sort processes according to priority
+	// Bubble sort policyes according to priority
 	for i := 0; i < len(thpool); i++ {
 		for j := 0; j < len(thpool)-1; j++ {
 			if thpool[j].Priority > thpool[j+1].Priority {
@@ -74,22 +81,20 @@ func sortThreads(thpool []Thread) (thPoolSorted []Thread) {
 			}
 		}
 	}
-
 	return thpool
-
 }
 
-func threadId() (id uint16) {
-
-	rand.Seed(time.Now().UnixNano())
-	return uint16(rand.Uint32())
+func LogThreadpool(policy string, thpool []Thread) {
+	log.Printf("[%s] - threadpool:  %+v\n", policy, thpool)
 }
 
-func threadWorktime() (worktime uint32) {
-
-	rand.Seed(time.Now().UnixNano())
-	return rand.Uint32()
-
+func InitWaitingThreads(ch1 chan Thread, ch2 chan Thread, ch3 chan Thread, thpoolSize int) {
+	for i := 0; i < thpoolSize; i++ {
+		th := CreateThread()
+		ch1 <- th
+		ch2 <- th
+		ch3 <- th
+	}
 }
 
 func InitThreadpoolControl() []Thread {

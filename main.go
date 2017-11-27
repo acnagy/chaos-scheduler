@@ -10,6 +10,7 @@ import (
 )
 
 var threadpoolSize = flag.Int("t", 5, "set size for threadpool")
+var numberThreads = flag.Int("n", 10, "set number of threads created during program execution")
 var randomMode = flag.Bool("r", true, "run random scheduling")
 var weatherMode = flag.Bool("w", true, "run weather scheduling")
 var sjfMode = flag.Bool("s", true, "run shortest-job-first scheduling")
@@ -33,35 +34,47 @@ func main() {
 
 	// Determine/Notify running modes
 	flag.Parse()
-	threadpool := make([]threads.Thread, *threadpoolSize)
-	threadpool = threads.InitThreadpool(threadpool)
-	threads.LogThreadpool(threadpool)
-	runConfig := fmt.Sprintf("[main] modes: random: %t, weather: %t, sjf: %t; threadpool size: %d\n",
-		*randomMode, *weatherMode, *sjfMode, *threadpoolSize)
-
+	runConfig := fmt.Sprintf(
+		"[main] modes: random: %t, weather: %t, sjf: %t; threadpool size: %d, max threads: %d\n",
+		*randomMode, *weatherMode, *sjfMode, *threadpoolSize, *numberThreads,
+	)
 	log.Printf(runConfig)
 	fmt.Printf(runConfig)
 
 	// Run modes concurrently
 	randomDone := make(chan bool, 1)
+	randomThr := make(chan threads.Thread, *numberThreads)
+
 	weatherDone := make(chan bool, 1)
+	weatherThr := make(chan threads.Thread, *numberThreads)
+
 	sjfDone := make(chan bool, 1)
+	sjfThr := make(chan threads.Thread, *numberThreads)
+
+	threadsDone := make(chan bool, 1)
+	threads.InitWaitingThreads(randomThr, weatherThr, sjfThr, *threadpoolSize)
+	if *threadpoolSize != *numberThreads {
+		go threads.CreateThreadRandomly(
+			randomThr, weatherThr, sjfThr,
+			*numberThreads-*threadpoolSize,
+			threadsDone,
+		)
+	}
 
 	if *randomMode {
-		go scheduling.Run("random", threadpool, randomDone)
+		go scheduling.Run("random", *threadpoolSize, randomThr, randomDone)
 	}
 	if *weatherMode {
-		go scheduling.Run("weather", threadpool, weatherDone)
+		go scheduling.Run("weather", *threadpoolSize, weatherThr, weatherDone)
 	}
-
 	if *sjfMode {
-		go scheduling.Run("sjf", threadpool, sjfDone)
+		go scheduling.Run("sjf", *threadpoolSize, sjfThr, sjfDone)
 	}
 
 	<-randomDone
 	<-weatherDone
 	<-sjfDone
+	<-threadsDone
 
 	log.Println("[main] - complete!")
-
 }

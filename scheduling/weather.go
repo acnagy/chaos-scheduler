@@ -21,7 +21,7 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 
 	lat_long := strconv.FormatFloat(lat, 'f', -1, 64) + "," + strconv.FormatFloat(long, 'f', -1, 64)
 	url := "http://api.wunderground.com/api/" + os.Getenv("WUNDERGROUND_KEY") + "/geolookup/conditions/q/" + lat_long + ".json"
-	log.Printf("[weather] Request URL: %s", url)
+	log.Printf("[weather] - Request URL: %s", url)
 
 	for i := 0; i < len(thpool); i++ {
 
@@ -32,9 +32,9 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 		defer resp.Body.Close()
 
 		status := resp.Status
-		log.Printf("[weather] response status for thread id: %d - %s\n", thpool[i].Id, status)
+		log.Printf("[weather] - response status for thread id: %d - %s\n", thpool[i].Id, status)
 		if err != nil {
-			log.Printf("[weather] error retrieving conditions: %s\n", err)
+			log.Printf("[weather] - error retrieving conditions: %s\n", err)
 		}
 
 		cdtn, err := ioutil.ReadAll(resp.Body)
@@ -56,7 +56,7 @@ func weather_priorities(thpool []threads.Thread) []threads.Thread {
 
 		var current currentObservation
 		if err := json.Unmarshal(cdtn, &current); err != nil {
-			log.Printf("[weather] error unmarshalling conditions for %s: %s\n", lat_long, err)
+			log.Printf("[weather] - error unmarshalling conditions for %s: %s\n", lat_long, err)
 		}
 
 		temp := current.Data.Temp

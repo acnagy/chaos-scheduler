@@ -11,6 +11,7 @@ experiment, possibly with terrible ideas.
 -w    weather mode              | bool  default: true
 -s    shortest-job-first mode   | bool  default: true
 -t    set size of threadpool    | int   default: 5
+-n    number of threads created | int   default: 10
 ```
 
 Examples: 

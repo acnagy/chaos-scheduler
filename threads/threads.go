@@ -43,10 +43,15 @@ func CreateThreadRandomly(ch1 chan Thread, ch2 chan Thread,
 }
 
 func PickUpThreads(thpool []Thread, maxThreads int, waitingTh chan Thread) []Thread {
-	for i := 0; i < cap(thpool); i++ {
+	for i := 0; i < len(thpool); i++ {
 		if thpool[i].Id == 0 {
-			th := <-waitingTh
-			thpool[i] = th
+			// receive from waiting threads channel iff there are still simulations to run
+			if maxThreads >= len(thpool) {
+				th := <-waitingTh
+				thpool[i] = th
+			} else {
+				close(waitingTh)
+			}
 		}
 	}
 

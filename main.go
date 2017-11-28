@@ -56,16 +56,13 @@ func main() {
 	// Init thread creation process
 	threadsDone := make(chan bool, 1)
 	threads.InitWaitingThreads(randomThr, weatherStaticThr, weatherVariableThr, sjfThr, *threadpoolSize)
-	if *threadpoolSize < *numberThreads {
-		go threads.CreateThreadRandomly(
-			randomThr, weatherStaticThr, weatherVariableThr, sjfThr,
-			*numberThreads-*threadpoolSize,
-			threadsDone,
-		)
-	} else {
-		threadsDone <- true
-		close(threadsDone)
-	}
+	print("HII")
+	print(*numberThreads - *threadpoolSize)
+	go threads.CreateThreadRandomly(
+		randomThr, weatherStaticThr, weatherVariableThr, sjfThr,
+		*numberThreads-*threadpoolSize,
+		threadsDone,
+	)
 
 	// Run the selected mode(s)
 	if *randomMode {

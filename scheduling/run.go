@@ -15,7 +15,7 @@ func Run(policy string, thpoolSize int, maxThreads int, waitingThreads chan thre
 	stout.Println(startedMsg)
 
 	for {
-		threadpool := make([]threads.Thread, thpoolSize, thpoolSize)
+		threadpool := make([]threads.Thread, thpoolSize)
 		threads.PickUpThreads(threadpool, maxThreads, waitingThreads)
 		threads.LogThreadpool(policy, threadpool)
 

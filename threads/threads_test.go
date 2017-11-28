@@ -45,11 +45,15 @@ func TestWork(t *testing.T) {
 	for i := 0; i < len(thpool); i++ {
 		expectedWorktime = expectedWorktime + thpool[i].Worktime
 	}
-	_, duration := Work("testing", thpool)
+	thpoolOut, _ := Work("testing", thpool)
 
-	if duration != time.Duration(expectedWorktime) {
-		fmt.Printf("duration: %d, expectedWorktime: %d", duration, expectedWorktime)
-		t.Fail()
+	for i := 0; i < len(thpool); i++ {
+		if (thpoolOut[i].id != 0) ||
+			(thpoolOut[i].Priority != 0) ||
+			(thpoolOut[i].Worktime != 0) {
+
+			t.Fail()
+		}
 	}
 
 }

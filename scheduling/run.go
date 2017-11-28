@@ -26,6 +26,7 @@ func Run(policy string, thpoolSize int, maxThreads int, waitingThreads chan thre
 			threadpool = weather_priorities(policy, threadpool)
 		case "sjf":
 			threadpool = sjf_priorities(threadpool)
+		case "control": // for benchmarking
 		default:
 			stout.Panicln("policy selection error")
 			log.Panicln("invalid policy selection string")

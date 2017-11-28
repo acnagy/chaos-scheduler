@@ -1,7 +1,9 @@
 package threads
 
 import (
+	"fmt"
 	"log"
+	"math"
 	"math/rand"
 	"time"
 )
@@ -46,11 +48,13 @@ func PickUpThreads(thpool []Thread, maxThreads int, waitingTh chan Thread) []Thr
 	for i := 0; i < len(thpool); i++ {
 		if thpool[i].Id == 0 {
 			// receive from waiting threads channel iff there are still simulations to run
-			if maxThreads >= len(thpool) {
-				th := <-waitingTh
+			select {
+			case th := <-waitingTh:
+				fmt.Println(th)
 				thpool[i] = th
-			} else {
-				close(waitingTh)
+				fmt.Println(thpool[i].Id)
+			default:
+				fmt.Println("no new threads")
 			}
 		}
 	}
@@ -79,7 +83,7 @@ func Work(policy string, thpool []Thread) ([]Thread, time.Duration) {
 	log.Printf("[%s] thread batch sorted by priority\n", policy)
 
 	for i := 0; i < len(thpool); i++ {
-		if threadpool[i].Id == 0 {
+		if threadpool[i].Id != 0 {
 			log.Printf("[%s] id: %d - working %d ms...",
 				policy, threadpool[i].Id, threadpool[i].Worktime/1E6)
 
@@ -105,22 +109,33 @@ func LogThreadpool(policy string, thpool []Thread) {
 }
 
 func InitWaitingThreads(ch1 chan Thread, ch2 chan Thread,
-	ch3 chan Thread, ch4 chan Thread, thpoolSize int) {
-	for i := 0; i < thpoolSize; i++ {
+	ch3 chan Thread, ch4 chan Thread, thpoolSize int, maxThreads int) {
+	thToCreate := math.Min(float64(thpoolSize), float64(maxThreads))
+	fmt.Println(thToCreate)
+	for i := 0; i < int(thToCreate); i++ {
 		th := CreateThread()
 		ch1 <- th
 		ch2 <- th
 		ch3 <- th
 		ch4 <- th
+		fmt.Println(th)
 	}
 }
 
 func InitThreadpoolControl() []Thread {
 	return []Thread{
-		{Id: 6, Priority: 2, Worktime: 1000000},
-		{Id: 2, Priority: 4, Worktime: 2500000},
-		{Id: 4, Priority: 1, Worktime: 50000},
-		{Id: 8, Priority: 7, Worktime: 350000},
-		{Id: 5, Priority: 8, Worktime: 500},
+		{Id: 6000, Priority: 2, Worktime: 1000000},
+		{Id: 2000, Priority: 4, Worktime: 2500000},
+		{Id: 4000, Priority: 1, Worktime: 50000},
+		{Id: 8000, Priority: 7, Worktime: 350000},
+		{Id: 5000, Priority: 8, Worktime: 500},
 	}
+}
+
+func InitWaitingThreadsControl(ch chan Thread) {
+	ch <- Thread{Id: 6000, Priority: 2, Worktime: 1000000}
+	ch <- Thread{Id: 2000, Priority: 4, Worktime: 2500000}
+	ch <- Thread{Id: 4000, Priority: 1, Worktime: 50000}
+	ch <- Thread{Id: 8000, Priority: 7, Worktime: 350000}
+	ch <- Thread{Id: 5000, Priority: 8, Worktime: 500}
 }

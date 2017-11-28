@@ -1,11 +1,9 @@
 package threads
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"testing"
-	"time"
 )
 
 func TestsortThreads(t *testing.T) {
@@ -48,10 +46,9 @@ func TestWork(t *testing.T) {
 	thpoolOut, _ := Work("testing", thpool)
 
 	for i := 0; i < len(thpool); i++ {
-		if (thpoolOut[i].id != 0) ||
+		if (thpoolOut[i].Id != 0) ||
 			(thpoolOut[i].Priority != 0) ||
 			(thpoolOut[i].Worktime != 0) {
-
 			t.Fail()
 		}
 	}

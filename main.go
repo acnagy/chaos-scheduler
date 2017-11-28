@@ -52,11 +52,11 @@ func main() {
 
 	sjfDone := make(chan bool, 1)
 	sjfThr := make(chan threads.Thread, *numberThreads)
+	fmt.Println("make channels")
 
 	// Init thread creation process
 	threadsDone := make(chan bool, 1)
-	threads.InitWaitingThreads(randomThr, weatherStaticThr, weatherVariableThr, sjfThr, *threadpoolSize)
-	print("HII")
+	threads.InitWaitingThreads(randomThr, weatherStaticThr, weatherVariableThr, sjfThr, *threadpoolSize, *numberThreads)
 	print(*numberThreads - *threadpoolSize)
 	go threads.CreateThreadRandomly(
 		randomThr, weatherStaticThr, weatherVariableThr, sjfThr,

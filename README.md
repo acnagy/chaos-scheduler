@@ -1,15 +1,23 @@
 # chaos-scheduler ☀🌧⚡⛅ vs. 💻✨
 
-The chaos scheduler is a non-preemptive priority-based scheduling algorithm which does
-unexpected things. It has two modes: Random, and Weather. The goal here is to
-experiment, possibly with terrible ideas.
+The chaos scheduler is a non-preemptive priority-based scheduling algorithm which does unexpected things. It has four modes: Random, Weather - Static, Weather - Variable, and Shortest Job First. The goal here is to experiment, possibly with terrible ideas.
+
+### Definitions
+* Random: threads are prioritized... at [pseudo-random](https://golang.org/pkg/math/rand/)
+* Weather - Static: threads are prioritized based on a static latitude/longitude (Boston)
+* Weather - Variable: threads are prioritized based on the weather at a _generated_ latitude/longitude. The coordinates are generated based off of the thread id
+* Shortest Job First: threads are prioritized based on what should be the shortest running thread
+
+### Work
+Note: no real work is done here - these threads are executing a difficult job of sleeping for a pseudo-randomly generated period of nanoseconds
 
 ## Running 
 
 ```
 -r    random mode               | bool  default: true
--w    weather mode              | bool  default: true
--s    shortest-job-first mode   | bool  default: true
+-w    weather mode (static)     | bool  default: true
+-v    weather mode (variable)   | bool  default: true
+-j    shortest-job-first mode   | bool  default: true
 -t    set size of threadpool    | int   default: 5
 -n    number of threads created | int   default: 10
 ```

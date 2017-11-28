@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func Run(policy string, thpoolSize int, waitingThreads chan threads.Thread, done chan bool) {
+func Run(policy string, thpoolSize int, maxThreads int, waitingThreads chan threads.Thread, done chan bool) {
 	stout := log.New(os.Stdout, "[chaos-scheduler]", log.Ldate|log.Ltime|log.Lshortfile)
 	startedMsg := fmt.Sprintf("[%s] - started", policy)
 
@@ -16,25 +16,26 @@ func Run(policy string, thpoolSize int, waitingThreads chan threads.Thread, done
 
 	for {
 		threadpool := make([]threads.Thread, thpoolSize, thpoolSize)
-		threads.PickUpThreads(threadpool, waitingThreads)
+		threads.PickUpThreads(threadpool, maxThreads, waitingThreads)
 		threads.LogThreadpool(policy, threadpool)
 
 		switch policy {
 		case "random":
 			threadpool = random_priorities(threadpool)
-		case "weather":
-			threadpool = weather_priorities(threadpool)
+		case "weather - static", "weather - variable":
+			threadpool = weather_priorities(policy, threadpool)
 		case "sjf":
 			threadpool = sjf_priorities(threadpool)
 		default:
-			stout.Println("policy selection error")
+			stout.Panicln("policy selection error")
 			log.Panicln("invalid policy selection string")
 		}
 
 		threads.Work(policy, threadpool)
+		log.Printf("[%s] work complete", policy)
 
 		_, ok := <-waitingThreads
-		log.Printf("[%s] - threads channel status: %t\n", policy, ok)
+		log.Printf("[%s] threads channel status: %t\n", policy, ok)
 		threads.LogThreadpool(policy, threadpool)
 
 		if !ok {
@@ -43,7 +44,7 @@ func Run(policy string, thpoolSize int, waitingThreads chan threads.Thread, done
 		}
 	}
 
-	doneMsg := fmt.Sprintf("[%s] - done", policy)
+	doneMsg := fmt.Sprintf("[%s] - DONE", policy)
 	log.Println(doneMsg)
 	stout.Println(doneMsg)
 }

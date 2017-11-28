@@ -1,9 +1,11 @@
 package threads
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"testing"
+	"time"
 )
 
 func TestsortThreads(t *testing.T) {
@@ -43,9 +45,10 @@ func TestWork(t *testing.T) {
 	for i := 0; i < len(thpool); i++ {
 		expectedWorktime = expectedWorktime + thpool[i].Worktime
 	}
-	worktime, _ := Work("testing", thpool)
+	_, duration := Work("testing", thpool)
 
-	if worktime != expectedWorktime {
+	if duration != time.Duration(expectedWorktime) {
+		fmt.Printf("duration: %d, expectedWorktime: %d", duration, expectedWorktime)
 		t.Fail()
 	}
 

@@ -13,8 +13,8 @@ func BenchmarkRun_Random(b *testing.B) {
 	os.Stdout, _ = os.Open(os.DevNull)
 
 	for n := 0; n < b.N; n++ {
-		thpool := threads.InitThreadpoolControl()
-		Run("random", thpool, make(chan bool, 1))
+		//thpool := threads.InitThreadpoolControl()
+		Run("random", 10, make(chan threads.Thread, 10), make(chan bool, 1))
 	}
 }
 
@@ -23,8 +23,8 @@ func BenchmarkRun_Weather(b *testing.B) {
 	os.Stdout, _ = os.Open(os.DevNull)
 
 	for n := 0; n < b.N; n++ {
-		thpool := threads.InitThreadpoolControl()
-		Run("weather", thpool, make(chan bool, 1))
+		//thpool := threads.InitThreadpoolControl()
+		Run("weather", 10, make(chan threads.Thread, 10), make(chan bool, 1))
 	}
 }
 
@@ -33,7 +33,7 @@ func BenchmarkRun_ShortestJobFirst(b *testing.B) {
 	os.Stdout, _ = os.Open(os.DevNull)
 
 	for n := 0; n < b.N; n++ {
-		thpool := threads.InitThreadpoolControl()
-		Run("sjf", thpool, make(chan bool, 1))
+		//thpool := threads.InitThreadpoolControl()
+		Run("sjf", 10, make(chan threads.Thread, 10), make(chan bool, 1))
 	}
 }

@@ -19,7 +19,9 @@ func Run(policy string,
 	log.Println(startedMsg)
 	stout.Println(startedMsg)
 
-	for {
+	simulate := true
+
+	for simulate {
 		threadpool := make([]threads.Thread, thpoolSize)
 		threads.PickUpThreads(threadpool, maxThreads, waitingThreads)
 		threads.LogThreadpool(policy, threadpool)
@@ -47,14 +49,10 @@ func Run(policy string,
 			waitingThreads <- th
 		default:
 			noMoreThreads <- true
-			noMoreThreadsMsg := fmt.Sprintf("[%s] no more simulated thread", policy)
+			noMoreThreadsMsg := fmt.Sprintf("[%s] no more simulated threads", policy)
 			log.Println(noMoreThreadsMsg)
 			stout.Println(noMoreThreadsMsg)
-			break
+			simulate = false
 		}
-
-		//log.Printf("[%s] threads channel status: %t\n", policy, ok)
-		//threads.LogThreadpool(policy, threadpool)
-
 	}
 }

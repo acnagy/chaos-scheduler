@@ -1,7 +1,6 @@
 package threads
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -106,14 +105,12 @@ func LogThreadpool(policy string, thpool []Thread) {
 func InitWaitingThreads(ch1 chan Thread, ch2 chan Thread,
 	ch3 chan Thread, ch4 chan Thread, thpoolSize int, maxThreads int) {
 	thToCreate := math.Min(float64(thpoolSize), float64(maxThreads))
-	fmt.Println(thToCreate)
 	for i := 0; i < int(thToCreate); i++ {
 		th := CreateThread()
 		ch1 <- th
 		ch2 <- th
 		ch3 <- th
 		ch4 <- th
-		fmt.Println(th)
 	}
 }
 

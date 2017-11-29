@@ -53,7 +53,6 @@ func main() {
 
 	sjfDone := make(chan bool, 1)
 	sjfThr := make(chan threads.Thread, *numberThreads)
-	fmt.Println("make channels")
 
 	// Init thread creation routine
 	threadsDone := make(chan bool, 1)

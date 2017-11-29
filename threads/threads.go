@@ -22,26 +22,26 @@ func CreateThread() Thread {
 }
 
 func CreateThreadRandomly(ch1 chan Thread, ch2 chan Thread,
-	ch3 chan Thread, ch4 chan Thread, thRemaining int, done chan bool) {
+	ch3 chan Thread, ch4 chan Thread, threadsRemaining int, noMoreThreads chan bool) {
 	rand.Seed(time.Now().UnixNano())
 
-	for thRemaining > 0 {
+	// if the simulation is setup with more threads, randomly generate them
+	// and queue up in the scheduling tasks' channels
+	for threadsRemaining > 0 {
 		t := rand.Uint32() / 1E9
 		time.Sleep(time.Duration(t) * time.Nanosecond)
-		log.Printf("[all] new thread! Remaining: %d", thRemaining)
+		log.Printf("[all] new thread! Remaining: %d", threadsRemaining)
 		th := CreateThread()
 		ch1 <- th
 		ch2 <- th
 		ch3 <- th
 		ch4 <- th
-		thRemaining = thRemaining - 1
+		threadsRemaining = threadsRemaining - 1
 	}
-	close(ch1)
-	close(ch2)
-	close(ch3)
-	close(ch4)
 
-	done <- true
+	// indicate there are no more new threads to simulate
+	noMoreThreads <- true
+	close(noMoreThreads)
 }
 
 func PickUpThreads(thpool []Thread, maxThreads int, waitingTh chan Thread) []Thread {
@@ -50,11 +50,8 @@ func PickUpThreads(thpool []Thread, maxThreads int, waitingTh chan Thread) []Thr
 			// receive from waiting threads channel iff there are still simulations to run
 			select {
 			case th := <-waitingTh:
-				fmt.Println(th)
 				thpool[i] = th
-				fmt.Println(thpool[i].Id)
 			default:
-				fmt.Println("no new threads")
 			}
 		}
 	}
@@ -86,9 +83,7 @@ func Work(policy string, thpool []Thread) ([]Thread, time.Duration) {
 		if threadpool[i].Id != 0 {
 			log.Printf("[%s] id: %d - working %d ms...",
 				policy, threadpool[i].Id, threadpool[i].Worktime/1E6)
-
 			time.Sleep(time.Duration(threadpool[i].Worktime) * time.Nanosecond)
-
 			log.Printf("[%s] id: %d - done\n", policy, threadpool[i].Id)
 
 			threadpool[i] = Thread{0, 0, 0}

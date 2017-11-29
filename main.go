@@ -54,10 +54,9 @@ func main() {
 	sjfThr := make(chan threads.Thread, *numberThreads)
 	fmt.Println("make channels")
 
-	// Init thread creation process
+	// Init thread creation routine
 	threadsDone := make(chan bool, 1)
 	threads.InitWaitingThreads(randomThr, weatherStaticThr, weatherVariableThr, sjfThr, *threadpoolSize, *numberThreads)
-	print(*numberThreads - *threadpoolSize)
 	go threads.CreateThreadRandomly(
 		randomThr, weatherStaticThr, weatherVariableThr, sjfThr,
 		*numberThreads-*threadpoolSize,
@@ -78,7 +77,11 @@ func main() {
 	}
 
 	if *weatherVariableMode {
-		go scheduling.Run("weather - variable", *threadpoolSize, *numberThreads, weatherVariableThr, weatherVariableDone)
+		go scheduling.Run("weather - variable",
+			*threadpoolSize,
+			*numberThreads,
+			weatherVariableThr,
+			weatherVariableDone)
 	} else {
 		weatherVariableDone <- true
 	}

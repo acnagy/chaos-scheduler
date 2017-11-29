@@ -7,9 +7,14 @@ import (
 	"os"
 )
 
-func Run(policy string, thpoolSize int, maxThreads int, waitingThreads chan threads.Thread, done chan bool) {
-	stout := log.New(os.Stdout, "[chaos-scheduler]", log.Ldate|log.Ltime|log.Lshortfile)
-	startedMsg := fmt.Sprintf("[%s] - started", policy)
+func Run(policy string,
+	thpoolSize int,
+	maxThreads int,
+	waitingThreads chan threads.Thread,
+	noMoreThreads chan bool) {
+
+	stout := log.New(os.Stdout, "[chaos-scheduler] ", log.Ldate|log.Ltime|log.Lshortfile)
+	startedMsg := fmt.Sprintf("[%s] started", policy)
 
 	log.Println(startedMsg)
 	stout.Println(startedMsg)
@@ -35,17 +40,21 @@ func Run(policy string, thpoolSize int, maxThreads int, waitingThreads chan thre
 		threads.Work(policy, threadpool)
 		log.Printf("[%s] work complete", policy)
 
-		_, ok := <-waitingThreads
-		log.Printf("[%s] threads channel status: %t\n", policy, ok)
-		threads.LogThreadpool(policy, threadpool)
-
-		if !ok {
-			done <- true
+		select {
+		case th := <-waitingThreads:
+			// check if there's a thread to read
+			// return to channel if something's there
+			waitingThreads <- th
+		default:
+			noMoreThreads <- true
+			noMoreThreadsMsg := fmt.Sprintf("[%s] no more simulated thread", policy)
+			log.Println(noMoreThreadsMsg)
+			stout.Println(noMoreThreadsMsg)
 			break
 		}
-	}
 
-	doneMsg := fmt.Sprintf("[%s] - DONE", policy)
-	log.Println(doneMsg)
-	stout.Println(doneMsg)
+		//log.Printf("[%s] threads channel status: %t\n", policy, ok)
+		//threads.LogThreadpool(policy, threadpool)
+
+	}
 }

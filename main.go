@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/acnagy/chaos-scheduler/scheduling"
+	"github.com/acnagy/chaos-scheduler/simulation"
 	"github.com/acnagy/chaos-scheduler/threads"
 	"log"
 	"os"
@@ -57,7 +58,7 @@ func main() {
 	// Init thread creation routine
 	threadsDone := make(chan bool, 1)
 	threads.InitWaitingThreads(randomThr, weatherStaticThr, weatherVariableThr, sjfThr, *threadpoolSize, *numberThreads)
-	go threads.CreateThreadRandomly(
+	go simulation.CreateThreadRandomly(
 		randomThr, weatherStaticThr, weatherVariableThr, sjfThr,
 		*numberThreads-*threadpoolSize,
 		threadsDone,

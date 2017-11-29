@@ -2,7 +2,6 @@ package scheduling
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/acnagy/chaos-scheduler/threads"
 	"io/ioutil"
 	"log"
@@ -73,7 +72,6 @@ func weather_priorities(policy string, thpool []threads.Thread) []threads.Thread
 			current.Data.Place.City, current.Data.Place.State,
 			current.Data.Place.Country,
 		)
-		fmt.Println(current)
 
 		temp := current.Data.Temp
 		pressure := current.Data.Pressure
@@ -105,7 +103,6 @@ func variable_lat_long(threadId uint16) string {
 	rand.Seed(time.Now().UnixNano())
 
 	division_factor := rand.Float64() * 10.0 // magic number makes divisor bigger
-	fmt.Println(division_factor)
 	var mask_upper uint16 = 0xFF00
 	var mask_lower uint16 = 0x00FF
 
